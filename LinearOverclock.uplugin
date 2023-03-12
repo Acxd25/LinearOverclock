@@ -1,0 +1,34 @@
+{
+	"FileVersion": 3,
+	"SemVersion": "1.0.0",
+	"AcceptsAnyRemoteVersion": false,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "LinearOverclock",
+	"Description": "Makes all machines have linear power consumption when overclocked",
+	"Category": "Other",
+	"CreatedBy": "Scordium (Topaz#6700)",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+        	{
+            	"Name": "LinearOverclock",
+            	"Type": "Runtime",
+            	"LoadingPhase": "Default"
+        	}
+    	],
+	"Plugins": [
+		{
+			"Name": "SML",
+			"SemVersion": "^3.4.1",
+			"bIsOptional": false,
+			"Enabled": true
+		}
+	]
+}
