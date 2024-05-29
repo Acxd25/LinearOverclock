@@ -8,20 +8,21 @@
 
 void FLinearOverclockModule::StartupModule() {
 #if !WITH_EDITOR
-	SUBSCRIBE_METHOD(AFGBuildableFactory::GetProducingPowerConsumption, [](auto& scope, const AFGBuildableFactory* self)
+	SUBSCRIBE_METHOD(AFGBuildableFactory::GetProducingPowerConsumption, [](auto& Scope, const AFGBuildableFactory* Self)
 	{
-		if(auto variablePowerMachine = Cast<AFGBuildableManufacturerVariablePower>(self))
+		if(auto VariablePowerMachine = Cast<AFGBuildableManufacturerVariablePower>(Self))
 		{
-			auto recipe = variablePowerMachine->GetCurrentRecipe().GetDefaultObject();
-			if(!recipe) return;
-			auto minConsumption = recipe->GetPowerConsumptionConstant() * variablePowerMachine->GetCurrentPotential();
-			auto maxConsumption = (recipe->GetPowerConsumptionConstant() + recipe->GetPowerConsumptionFactor()) * variablePowerMachine->GetCurrentPotential();
+			auto Recipe = VariablePowerMachine->GetCurrentRecipe().GetDefaultObject();
+			if(!Recipe) return;
 			
-			auto currentUsage = FMath::GetMappedRangeValueClamped(FVector2D(0, 1), FVector2D(minConsumption, maxConsumption), variablePowerMachine->mPowerConsumptionCurve->GetFloatValue(self->GetProductionProgress()));
+			auto MinConsumption = Recipe->GetPowerConsumptionConstant() * VariablePowerMachine->GetCurrentPotential();
+			auto MaxConsumption = (Recipe->GetPowerConsumptionConstant() + Recipe->GetPowerConsumptionFactor()) * VariablePowerMachine->GetCurrentPotential();
+			
+			auto CurrentUsage = FMath::GetMappedRangeValueClamped(FVector2D(0, 1), FVector2D(MinConsumption, MaxConsumption), VariablePowerMachine->mPowerConsumptionCurve->GetFloatValue(Self->GetProductionProgress()));
 
-			scope.Override(currentUsage);
+			Scope.Override(CurrentUsage);
 		}
-		else scope.Override(self->GetDefaultProducingPowerConsumption() * self->GetCurrentPotential());
+		else Scope.Override(Self->GetDefaultProducingPowerConsumption() * Self->GetCurrentPotential());
 	});
 
 
