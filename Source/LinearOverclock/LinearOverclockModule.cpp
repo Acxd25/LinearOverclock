@@ -7,41 +7,43 @@
 #include "Patching/NativeHookManager.h"
 
 void FLinearOverclockModule::StartupModule() {
-#if !WITH_EDITOR
-	SUBSCRIBE_METHOD(AFGBuildableFactory::GetProducingPowerConsumption, [](auto& Scope, const AFGBuildableFactory* Self)
+	
+	if(!WITH_EDITOR)
 	{
-		if(auto VariablePowerMachine = Cast<AFGBuildableManufacturerVariablePower>(Self))
+		SUBSCRIBE_METHOD(AFGBuildableFactory::GetProducingPowerConsumption, [](auto& Scope, const AFGBuildableFactory* Self)
 		{
-			auto Recipe = VariablePowerMachine->GetCurrentRecipe().GetDefaultObject();
-			if(!Recipe) return;
+			if(auto VariablePowerMachine = Cast<AFGBuildableManufacturerVariablePower>(Self))
+			{
+				auto Recipe = VariablePowerMachine->GetCurrentRecipe().GetDefaultObject();
+				if(!Recipe) return;
 			
-			auto MinConsumption = Recipe->GetPowerConsumptionConstant() * VariablePowerMachine->GetCurrentPotential();
-			auto MaxConsumption = (Recipe->GetPowerConsumptionConstant() + Recipe->GetPowerConsumptionFactor()) * VariablePowerMachine->GetCurrentPotential();
+				auto MinConsumption = Recipe->GetPowerConsumptionConstant() * VariablePowerMachine->GetCurrentPotential();
+				auto MaxConsumption = (Recipe->GetPowerConsumptionConstant() + Recipe->GetPowerConsumptionFactor()) * VariablePowerMachine->GetCurrentPotential();
 			
-			auto CurrentUsage = FMath::GetMappedRangeValueClamped(FVector2D(0, 1), FVector2D(MinConsumption, MaxConsumption), VariablePowerMachine->mPowerConsumptionCurve->GetFloatValue(Self->GetProductionProgress()));
+				auto CurrentUsage = FMath::GetMappedRangeValueClamped(FVector2D(0, 1), FVector2D(MinConsumption, MaxConsumption), VariablePowerMachine->mPowerConsumptionCurve->GetFloatValue(Self->GetProductionProgress()));
 
-			Scope.Override(CurrentUsage);
-		}
-		else Scope.Override(Self->GetDefaultProducingPowerConsumption() * Self->GetCurrentPotential());
-	});
+				Scope.Override(CurrentUsage);
+			}
+			else Scope.Override(Self->GetDefaultProducingPowerConsumption() * Self->GetCurrentPotential());
+		});
 
 
-	SUBSCRIBE_METHOD(AFGBuildableManufacturerVariablePower::GetMinPowerConsumption, [](auto& scope, const AFGBuildableManufacturerVariablePower* self)
-	{
-		auto recipe = self->GetCurrentRecipe().GetDefaultObject();
-		if(!recipe) return;
+		SUBSCRIBE_METHOD(AFGBuildableManufacturerVariablePower::GetMinPowerConsumption, [](auto& scope, const AFGBuildableManufacturerVariablePower* self)
+		{
+			auto recipe = self->GetCurrentRecipe().GetDefaultObject();
+			if(!recipe) return;
 		
-		scope.Override(recipe->GetPowerConsumptionConstant() * self->GetCurrentPotential());
-	});
+			scope.Override(recipe->GetPowerConsumptionConstant() * self->GetCurrentPotential());
+		});
 
-	SUBSCRIBE_METHOD(AFGBuildableManufacturerVariablePower::GetMaxPowerConsumption, [](auto& scope, const AFGBuildableManufacturerVariablePower* self)
-	{
-		auto recipe = self->GetCurrentRecipe().GetDefaultObject();
-		if(!recipe) return;
+		SUBSCRIBE_METHOD(AFGBuildableManufacturerVariablePower::GetMaxPowerConsumption, [](auto& scope, const AFGBuildableManufacturerVariablePower* self)
+		{
+			auto recipe = self->GetCurrentRecipe().GetDefaultObject();
+			if(!recipe) return;
 		
-		scope.Override( (recipe->GetPowerConsumptionConstant() + recipe->GetPowerConsumptionFactor()) * self->GetCurrentPotential() );
-	});
-#endif
+			scope.Override( (recipe->GetPowerConsumptionConstant() + recipe->GetPowerConsumptionFactor()) * self->GetCurrentPotential() );
+		});
+	}
 }
 
 IMPLEMENT_GAME_MODULE(FLinearOverclockModule, LinearOverclock);
