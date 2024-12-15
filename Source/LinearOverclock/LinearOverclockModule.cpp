@@ -19,29 +19,33 @@ void FLinearOverclockModule::StartupModule() {
 			
 				auto MinConsumption = Recipe->GetPowerConsumptionConstant() * VariablePowerMachine->GetCurrentPotential();
 				auto MaxConsumption = (Recipe->GetPowerConsumptionConstant() + Recipe->GetPowerConsumptionFactor()) * VariablePowerMachine->GetCurrentPotential();
-			
-				auto CurrentUsage = FMath::GetMappedRangeValueClamped(FVector2D(0, 1), FVector2D(MinConsumption, MaxConsumption), VariablePowerMachine->mPowerConsumptionCurve->GetFloatValue(Self->GetProductionProgress()));
 
-				Scope.Override(CurrentUsage);
+				auto CurveValue = VariablePowerMachine->mPowerConsumptionCurve->GetFloatValue(Self->GetProductionProgress());
+				
+				auto CurrentUsage = MinConsumption + (MaxConsumption - MinConsumption) * CurveValue;
+				
+				Scope.Override(FMath::Max(0.1f, CurrentUsage));
 			}
 			else Scope.Override(Self->GetDefaultProducingPowerConsumption() * Self->GetCurrentPotential());
 		});
 
 
-		SUBSCRIBE_METHOD(AFGBuildableManufacturerVariablePower::GetMinPowerConsumption, [](auto& scope, const AFGBuildableManufacturerVariablePower* self)
+		SUBSCRIBE_METHOD(AFGBuildableManufacturerVariablePower::GetMinPowerConsumption, [](auto& scope, const AFGBuildableManufacturerVariablePower* Self)
 		{
-			auto recipe = self->GetCurrentRecipe().GetDefaultObject();
-			if(!recipe) return;
-		
-			scope.Override(recipe->GetPowerConsumptionConstant() * self->GetCurrentPotential());
+			auto Recipe = Self->GetCurrentRecipe().GetDefaultObject();
+			if(!Recipe) return;
+
+			auto OutputValue = Recipe->GetPowerConsumptionConstant() * Self->GetCurrentPotential();
+			scope.Override(OutputValue);
 		});
 
-		SUBSCRIBE_METHOD(AFGBuildableManufacturerVariablePower::GetMaxPowerConsumption, [](auto& scope, const AFGBuildableManufacturerVariablePower* self)
+		SUBSCRIBE_METHOD(AFGBuildableManufacturerVariablePower::GetMaxPowerConsumption, [](auto& scope, const AFGBuildableManufacturerVariablePower* Self)
 		{
-			auto recipe = self->GetCurrentRecipe().GetDefaultObject();
-			if(!recipe) return;
-		
-			scope.Override( (recipe->GetPowerConsumptionConstant() + recipe->GetPowerConsumptionFactor()) * self->GetCurrentPotential() );
+			auto Recipe = Self->GetCurrentRecipe().GetDefaultObject();
+			if(!Recipe) return;
+
+			auto OutputValue = (Recipe->GetPowerConsumptionConstant() + Recipe->GetPowerConsumptionFactor()) * Self->GetCurrentPotential();
+			scope.Override(OutputValue);
 		});
 	}
 }
