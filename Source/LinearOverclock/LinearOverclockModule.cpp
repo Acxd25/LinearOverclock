@@ -24,7 +24,7 @@ void FLinearOverclockModule::StartupModule() {
 				
 				auto CurrentUsage = MinConsumption + (MaxConsumption - MinConsumption) * CurveValue;
 				
-				Scope.Override(FMath::Max(0.1f, CurrentUsage));
+				Scope.Override(FMath::Max(0.1f, CurrentUsage * Self->GetCurrentProductionBoost()));
 			}
 			else Scope.Override(Self->GetDefaultProducingPowerConsumption() * Self->GetCurrentPotential());
 		});
