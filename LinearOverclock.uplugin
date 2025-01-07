@@ -1,9 +1,9 @@
 {
 	"FileVersion": 3,
-	"SemVersion": "1.0.8",
+	"SemVersion": "1.0.9",
 	"AcceptsAnyRemoteVersion": false,
 	"Version": 1,
-	"VersionName": "1.0.8",
+	"VersionName": "1.0.9",
 	"FriendlyName": "LinearOverclock",
 	"Description": "Makes all machines have linear power consumption when overclocked",
 	"Category": "Modding",

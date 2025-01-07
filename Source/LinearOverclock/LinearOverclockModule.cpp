@@ -12,6 +12,8 @@ void FLinearOverclockModule::StartupModule() {
 	{
 		SUBSCRIBE_METHOD(AFGBuildableFactory::GetProducingPowerConsumption, [](auto& Scope, const AFGBuildableFactory* Self)
 		{
+			if (!Self->IsProducing()) return;
+			
 			if(auto VariablePowerMachine = Cast<AFGBuildableManufacturerVariablePower>(Self))
 			{
 				auto Recipe = VariablePowerMachine->GetCurrentRecipe().GetDefaultObject();
